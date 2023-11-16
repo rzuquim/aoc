@@ -1,14 +1,19 @@
-
 mod utils;
 
 fn main() {
     let (input_file, verbose) = utils::parse_args();
+    let (part_one, part_two) = solve(&input_file, verbose);
 
+    println!("Part one: {}", part_one);
+    println!("Part two: {}", part_two);
+}
+
+fn solve(input_file: &str, verbose: bool) -> (i32, i32) {
     let mut max_calories = [0, 0, 0];
     let mut curr_acc = 0;
     let mut elve_index = 0;
 
-    for line in utils::yield_lines(&input_file) {
+    for line in utils::yield_lines(input_file) {
         if let Some(calories) = parse_calories(line) {
             curr_acc = curr_acc + calories;
         } else {
@@ -26,8 +31,8 @@ fn main() {
         }
     }
 
-    let mut max_sum = 0;
     let mut max_max = 0;
+    let mut max_sum = 0;
 
     for max in max_calories {
         if max > max_max {
@@ -36,8 +41,7 @@ fn main() {
         max_sum += max;
     }
 
-    println!("Part one: {}", max_max);
-    println!("Part two: {}", max_sum);
+    return (max_max, max_sum);
 }
 
 fn parse_calories(line: Result<String, std::io::Error>) -> Option<i32> {
@@ -74,3 +78,19 @@ fn is_greater_than_previous_max(curr_acc: &i32, max_calories: &[i32]) -> Option<
     };
 }
 
+#[cfg(test)]
+mod tests {
+    use crate::solve;
+
+    #[test]
+    fn test_part_one() {
+      let (part_one_solved, _) = solve("./data_input.txt", false);
+      assert_eq!(part_one_solved, 66487)
+    }
+
+    #[test]
+    fn test_part_two() {
+      let (_, part_two_solved) = solve("./data_input.txt", false);
+      assert_eq!(part_two_solved, 197301)
+    }
+}

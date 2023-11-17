@@ -59,22 +59,17 @@ fn parse_calories(line: Result<String, std::io::Error>) -> Option<i32> {
 }
 
 fn is_greater_than_previous_max(curr_acc: &i32, max_calories: &[i32]) -> Option<usize> {
-    let mut min_max = &i32::MAX;
-    let mut min_idx = 0;
-
     // find out the minimum value on the collected max_calories
-    for (i, curr_max) in max_calories.iter().enumerate() {
-        if curr_max > min_max {
-            continue;
-        }
+    let (min_index, min_max) = max_calories
+        .iter()
+        .enumerate()
+        .min_by_key(|&(_, &value)| value)
+        .expect("max_calories should not be empty");
 
-        min_max = curr_max;
-        min_idx = i;
-    }
     return if min_max > curr_acc {
         None
     } else {
-        Some(min_idx)
+        Some(min_index)
     };
 }
 
@@ -84,13 +79,13 @@ mod tests {
 
     #[test]
     fn test_part_one() {
-      let (part_one_solved, _) = solve("./data_input.txt", false);
-      assert_eq!(part_one_solved, 66487)
+        let (part_one_solved, _) = solve("./data_input.txt", false);
+        assert_eq!(part_one_solved, 66487)
     }
 
     #[test]
     fn test_part_two() {
-      let (_, part_two_solved) = solve("./data_input.txt", false);
-      assert_eq!(part_two_solved, 197301)
+        let (_, part_two_solved) = solve("./data_input.txt", false);
+        assert_eq!(part_two_solved, 197301)
     }
 }

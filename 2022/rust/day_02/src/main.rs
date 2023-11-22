@@ -10,18 +10,19 @@ fn main() {
 
 fn solve(input_file: &str, verbose: bool) -> (i32, i32) {
     let mut part_one = 0;
+    let mut part_two = 0;
     for line in utils::yield_lines(input_file) {
-        let round = parse_game_round(line);
-        let current_round_points = round_points(&round);
+        let (round_pt_one, round_pt_two) = parse_game_rounds(line);
+        let curr_round_points_pt_one = round_points(&round_pt_one);
+        let curr_round_points_pt_two = round_points(&round_pt_two);
         if verbose {
-            println!(
-                "{:?} vs {:?} - {:?} ({} points)",
-                round.my_choice, round.opononents_choice, round.result, current_round_points
-            );
+            print_round(&round_pt_one, &curr_round_points_pt_one, "Part 1");
+            print_round(&round_pt_two, &curr_round_points_pt_two, "Part 2");
         }
-        part_one += current_round_points;
+        part_one += curr_round_points_pt_one;
+        part_two += curr_round_points_pt_two;
     }
-    return (part_one, -1);
+    return (part_one, part_two);
 }
 
 fn round_points(round: &Round) -> i32 {
@@ -40,14 +41,30 @@ fn round_points(round: &Round) -> i32 {
     return choice_points + result_points;
 }
 
-fn parse_game_round(line: Result<String, std::io::Error>) -> Round {
+fn parse_game_rounds(line: Result<String, std::io::Error>) -> (Round, Round) {
     let line = line.expect("Unexpected error reading line!");
     let line = line.trim();
     let line = line.chars().collect();
 
+    return (strategy_part_one(&line), strategy_part_two(&line));
+}
+
+fn strategy_part_one(line: &Vec<char>) -> Round {
     let opponents_choice = parse_players_choice(&line, 0);
     let my_choice = parse_players_choice(&line, 2);
-    let round_result = round_result(&my_choice, &opponents_choice);
+    let round_result = calc_round_result(&my_choice, &opponents_choice);
+
+    return Round {
+        my_choice,
+        opononents_choice: opponents_choice,
+        result: round_result,
+    };
+}
+
+fn strategy_part_two(line: &Vec<char>) -> Round {
+    let opponents_choice = parse_players_choice(&line, 0);
+    let round_result = parse_round_result(&line, 2);
+    let my_choice = calc_my_choice(&opponents_choice, &round_result);
 
     return Round {
         my_choice,
@@ -66,7 +83,17 @@ fn parse_players_choice(line: &Vec<char>, char_idx: usize) -> PlayersChoice {
     };
 }
 
-fn round_result(my_choice: &PlayersChoice, opponents_choice: &PlayersChoice) -> RoundResult {
+fn parse_round_result(line: &Vec<char>, char_idx: usize) -> RoundResult {
+    let letter = line[char_idx];
+    return match &letter {
+        'X' => RoundResult::Loose,
+        'Y' => RoundResult::Draw,
+        'Z' => RoundResult::Win,
+        _ => panic!("Unexpected value parsing round resutl: {}", letter),
+    };
+}
+
+fn calc_round_result(my_choice: &PlayersChoice, opponents_choice: &PlayersChoice) -> RoundResult {
     match (my_choice, opponents_choice) {
         (PlayersChoice::Rock, PlayersChoice::Paper) => RoundResult::Loose,
         (PlayersChoice::Rock, PlayersChoice::Scissors) => RoundResult::Win,
@@ -76,6 +103,27 @@ fn round_result(my_choice: &PlayersChoice, opponents_choice: &PlayersChoice) -> 
         (PlayersChoice::Scissors, PlayersChoice::Paper) => RoundResult::Win,
         _ => RoundResult::Draw,
     }
+}
+
+fn calc_my_choice(opponents_choice: &PlayersChoice, round_result: &RoundResult) -> PlayersChoice {
+    match (opponents_choice, round_result) {
+        (PlayersChoice::Rock, RoundResult::Loose) => PlayersChoice::Scissors,
+        (PlayersChoice::Rock, RoundResult::Draw) => PlayersChoice::Rock,
+        (PlayersChoice::Rock, RoundResult::Win) => PlayersChoice::Paper,
+        (PlayersChoice::Paper, RoundResult::Loose) => PlayersChoice::Rock,
+        (PlayersChoice::Paper, RoundResult::Draw) => PlayersChoice::Paper,
+        (PlayersChoice::Paper, RoundResult::Win) => PlayersChoice::Scissors,
+        (PlayersChoice::Scissors, RoundResult::Loose) => PlayersChoice::Paper,
+        (PlayersChoice::Scissors, RoundResult::Draw) => PlayersChoice::Scissors,
+        (PlayersChoice::Scissors, RoundResult::Win) => PlayersChoice::Rock,
+    }
+}
+
+fn print_round(r: &Round, points: &i32, part: &str) {
+    println!(
+        "{}: {:?} vs {:?} - {:?} ({} points)",
+        part, r.my_choice, r.opononents_choice, r.result, points
+    );
 }
 
 #[derive(Debug)]
@@ -107,5 +155,11 @@ mod tests {
     fn test_part_one() {
         let (part_one_solved, _) = solve("./data_input.txt", false);
         assert_eq!(part_one_solved, 11475);
+    }
+
+    #[test]
+    fn test_part_two() {
+        let (_, part_two_solved) = solve("./data_input.txt", false);
+        assert_eq!(part_two_solved, 16862);
     }
 }

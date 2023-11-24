@@ -17,7 +17,7 @@ fn solve(input_file: &str, verbose: bool) -> (u32, u32) {
     let mut curr_elve_group = Vec::<Rucksack>::with_capacity(3);
 
     for line in utils::yield_lines_trimmed(input_file) {
-        let rucksack = parse_rucksack(&line, verbose);
+        let rucksack = parse_rucksack(line, verbose);
 
         // part one
         let common_items = common_items_in_compartments(&rucksack, verbose);
@@ -35,7 +35,7 @@ fn solve(input_file: &str, verbose: bool) -> (u32, u32) {
     return (priority_by_commonality, priority_by_badge);
 }
 
-fn parse_rucksack(line: &String, verbose: bool) -> Rucksack {
+fn parse_rucksack(line: String, verbose: bool) -> Rucksack {
     let mid = line.len() / 2;
     let (compartment_a, compartment_b) = (&line[0..mid], &line[mid..]);
 

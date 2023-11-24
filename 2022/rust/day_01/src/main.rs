@@ -31,17 +31,10 @@ fn solve(input_file: &str, verbose: bool) -> (i32, i32) {
         }
     }
 
-    let mut max_max = 0;
-    let mut max_sum = 0;
+    let part_one_solution = max_calories.iter().max().unwrap();
+    let part_two_solution = max_calories.iter().sum();
 
-    for max in max_calories {
-        if max > max_max {
-            max_max = max;
-        }
-        max_sum += max;
-    }
-
-    return (max_max, max_sum);
+    return (*part_one_solution, part_two_solution);
 }
 
 fn parse_calories(line: Result<String, std::io::Error>) -> Option<i32> {

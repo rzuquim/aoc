@@ -1,4 +1,4 @@
-use std::collections::{HashSet};
+use std::collections::HashSet;
 
 mod utils;
 
@@ -10,20 +10,29 @@ fn main() {
     println!("Part two: {}", part_two);
 }
 
-fn solve(input_file: &str, verbose: bool) -> (u32, i32) {
-    let mut total_priority = 0;
+fn solve(input_file: &str, verbose: bool) -> (u32, u32) {
+    let mut priority_by_commonality = 0; // part one
+    let mut priority_by_badge = 0; // part two
+
+    let mut curr_elve_group = Vec::<Rucksack>::with_capacity(3);
+
     for line in utils::yield_lines_trimmed(input_file) {
         let rucksack = parse_rucksack(&line, verbose);
+
+        // part one
         let common_items = common_items_in_compartments(&rucksack, verbose);
+        let line_priority = calculate_priority_by_commonality(common_items, verbose);
+        priority_by_commonality += line_priority;
 
-        let line_priority = calculate_priority_by_commonality(common_items);
-        if verbose {
-            println!("Line priority {}", line_priority);
+        // part two
+        curr_elve_group.push(rucksack);
+        if curr_elve_group.len() == 3 {
+            let badge_letter = find_out_badge(&curr_elve_group, verbose);
+            priority_by_badge += item_priority(&badge_letter);
+            curr_elve_group.clear();
         }
-
-        total_priority += line_priority;
     }
-    return (total_priority, -1);
+    return (priority_by_commonality, priority_by_badge);
 }
 
 fn parse_rucksack(line: &String, verbose: bool) -> Rucksack {
@@ -51,21 +60,61 @@ fn common_items_in_compartments<'a>(
     return common_items;
 }
 
-fn calculate_priority_by_commonality<'a>(common_items: impl Iterator<Item = &'a char>) -> u32 {
-    common_items
-        .map(|letter| {
-            if letter.is_lowercase() {
-                (*letter as u32) - ('a' as u32) + 1
-            } else {
-                (*letter as u32) - ('A' as u32) + 27
-            }
-        })
-        .sum()
+fn find_out_badge(rucksacks: &Vec<Rucksack>, verbose: bool) -> char {
+    let first_rucksack = rucksacks.first().unwrap();
+    let mut common_items = first_rucksack.complete_rucksack();
+
+    // intersection with other two
+    for rucksack in rucksacks.iter().skip(1) {
+        common_items = common_items
+            .intersection(&rucksack.complete_rucksack())
+            .cloned()
+            .collect::<HashSet<char>>();
+
+    }
+
+    if common_items.len() > 1 {
+        panic!("Could not find the common item on the rucksacks!");
+    }
+
+    let badge_letter = *common_items.iter().next().unwrap();
+    if verbose {
+      println!("Common item in elves rucksack: {badge_letter}!");
+    }
+    return badge_letter;
+}
+
+fn calculate_priority_by_commonality<'a>(
+    common_items: impl Iterator<Item = &'a char>,
+    verbose: bool,
+) -> u32 {
+    let priority = common_items.map(item_priority).sum();
+    if verbose {
+        println!("Line priority {}", priority);
+    }
+    return priority;
+}
+
+fn item_priority(item: &char) -> u32 {
+    if item.is_lowercase() {
+        (*item as u32) - ('a' as u32) + 1
+    } else {
+        (*item as u32) - ('A' as u32) + 27
+    }
 }
 
 struct Rucksack {
     compartment_a: HashSet<char>,
     compartment_b: HashSet<char>,
+}
+
+impl Rucksack {
+    fn complete_rucksack(&self) -> HashSet<char> {
+        (&self.compartment_a)
+            .union(&self.compartment_b)
+            .map(|i| *i)
+            .collect::<HashSet<char>>()
+    }
 }
 
 #[cfg(test)]
@@ -79,9 +128,8 @@ mod tests {
     }
 
     #[test]
-    #[ignore]
     fn test_part_two() {
         let (_, part_two_solved) = solve("./data_input.txt", false);
-        assert_eq!(part_two_solved, -1);
+        assert_eq!(part_two_solved, 2716);
     }
 }

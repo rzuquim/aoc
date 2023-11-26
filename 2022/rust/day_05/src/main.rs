@@ -7,13 +7,20 @@ use utils::stack::{CargoStack, CargoStackTrait};
 
 fn main() {
     let (input_file, verbose) = io::parse_args();
-    let (part_one, part_two) = solve(&input_file, verbose);
+    let part_one = solve(&input_file, CrateCfg::CrateMover9000, verbose);
+    let part_two = solve(&input_file, CrateCfg::CrateMover9001, verbose);
 
     println!("Part one: {}", part_one);
     println!("Part two: {}", part_two);
 }
 
-fn solve(input_file: &str, verbose: bool) -> (String, String) {
+fn solve(input_file: &str, crate_cfg: CrateCfg, verbose: bool) -> String {
+    if verbose {
+        println!("#########################");
+        println!("{:?}", crate_cfg);
+        println!("#########################");
+    }
+
     let mut crates_state = Vec::<CargoStack>::new();
     let mut parsing_initial_state = true;
 
@@ -32,7 +39,7 @@ fn solve(input_file: &str, verbose: bool) -> (String, String) {
         }
 
         let move_cmd = parse::move_cmd(line, verbose);
-        move_cmd.apply(&mut crates_state, verbose)
+        move_cmd.apply(&mut crates_state, &crate_cfg, verbose)
     }
 
     let last_state = crates_state.iter().map(|stack| {
@@ -43,7 +50,7 @@ fn solve(input_file: &str, verbose: bool) -> (String, String) {
         }
     });
 
-    return (String::from_iter(last_state), String::from("TODO"));
+    return String::from_iter(last_state);
 }
 
 fn print_initial_state(state: &Vec<CargoStack>) {
@@ -52,20 +59,25 @@ fn print_initial_state(state: &Vec<CargoStack>) {
     }
 }
 
+#[derive(Debug)]
+pub enum CrateCfg {
+    CrateMover9000,
+    CrateMover9001,
+}
+
 #[cfg(test)]
 mod tests {
     use crate::solve;
 
     #[test]
     fn test_part_one() {
-        let (part_one_solved, _) = solve("./data_input.txt", false);
+        let part_one_solved = solve("./data_input.txt", crate::CrateCfg::CrateMover9000, false);
         assert_eq!(part_one_solved, "RNZLFZSJH");
     }
 
     #[test]
-    #[ignore]
     fn test_part_two() {
-        let (_, part_two_solved) = solve("./data_input.txt", false);
-        assert_eq!(part_two_solved, "abcde");
+        let part_two_solved = solve("./data_input.txt", crate::CrateCfg::CrateMover9001, false);
+        assert_eq!(part_two_solved, "CNSFCGJSM");
     }
 }

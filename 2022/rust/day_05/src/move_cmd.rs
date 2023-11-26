@@ -1,4 +1,4 @@
-use crate::utils::stack::CargoStack;
+use crate::{utils::stack::CargoStack, CrateCfg};
 
 #[derive(Debug)]
 pub struct MoveCmd {
@@ -8,13 +8,32 @@ pub struct MoveCmd {
 }
 
 impl MoveCmd {
-    pub fn apply(&self, state: &mut Vec<CargoStack>, verbose: bool) {
-        let to_move = pop(self, state, verbose);
+    pub fn apply(&self, state: &mut Vec<CargoStack>, crate_cfg: &CrateCfg, verbose: bool) {
+        let to_move = match crate_cfg {
+            CrateCfg::CrateMover9000 => pop_one_by_one(self, state, verbose),
+            CrateCfg::CrateMover9001 => pop_stack(self, state, verbose),
+        };
+
         push(self, state, &to_move, verbose);
     }
 }
 
-fn pop(move_cmd: &MoveCmd, state: &mut Vec<CargoStack>, verbose: bool) -> Vec<char> {
+fn pop_stack(move_cmd: &MoveCmd, state: &mut Vec<CargoStack>, verbose: bool) -> Vec<char> {
+    let from_stack = state
+        .get_mut(move_cmd.from)
+        .expect(&format!("Could not find stack {}", move_cmd.from));
+    let pop_index = from_stack.len() - move_cmd.amount;
+    let popped = from_stack.drain(pop_index..).collect();
+    if verbose {
+        println!(
+            "{:?} removed from {:?}! index {}",
+            popped, from_stack, move_cmd.from
+        );
+    }
+    return popped;
+}
+
+fn pop_one_by_one(move_cmd: &MoveCmd, state: &mut Vec<CargoStack>, verbose: bool) -> Vec<char> {
     let from_stack = state
         .get_mut(move_cmd.from)
         .expect(&format!("Could not find stack {}", move_cmd.from));

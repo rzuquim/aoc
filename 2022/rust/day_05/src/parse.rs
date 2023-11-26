@@ -1,7 +1,7 @@
 use crate::move_cmd::MoveCmd;
-use crate::utils::stack::Stack;
+use crate::utils::stack::{CargoStack, CargoStackTrait};
 
-pub fn initial_state(line: String, state: &mut Vec<Stack<char>>, verbose: bool) -> bool {
+pub fn initial_state(line: String, state: &mut Vec<CargoStack>, verbose: bool) -> bool {
     if line.is_empty() {
         return false;
     }
@@ -23,7 +23,7 @@ pub fn initial_state(line: String, state: &mut Vec<Stack<char>>, verbose: bool) 
                 if verbose {
                     println!("push crate {char} on stack {curr_stack_idx}");
                 }
-                curr_stack.setup(char);
+                curr_stack.insert_bottom(char);
             }
         }
     }
@@ -43,12 +43,9 @@ pub fn move_cmd(line: String, verbose: bool) -> MoveCmd {
     return move_cmd;
 }
 
-fn get_or_create_stack<'a>(
-    state: &'a mut Vec<Stack<char>>,
-    stack_idx: usize,
-) -> &'a mut Stack<char> {
+fn get_or_create_stack<'a>(state: &'a mut Vec<CargoStack>, stack_idx: usize) -> &'a mut CargoStack {
     if let None = state.get(stack_idx) {
-        let stack = Stack::new();
+        let stack = CargoStack::new();
         state.push(stack);
     }
     return &mut state[stack_idx];

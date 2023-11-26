@@ -3,7 +3,7 @@ mod parse;
 mod utils;
 
 use utils::io;
-use utils::stack::Stack;
+use utils::stack::{CargoStack, CargoStackTrait};
 
 fn main() {
     let (input_file, verbose) = io::parse_args();
@@ -14,7 +14,7 @@ fn main() {
 }
 
 fn solve(input_file: &str, verbose: bool) -> (String, String) {
-    let mut crates_state = Vec::<Stack<char>>::new();
+    let mut crates_state = Vec::<CargoStack>::new();
     let mut parsing_initial_state = true;
 
     for line in io::yield_lines(input_file) {
@@ -32,8 +32,7 @@ fn solve(input_file: &str, verbose: bool) -> (String, String) {
         }
 
         let move_cmd = parse::move_cmd(line, verbose);
-        let to_move = move_cmd.pop(&mut crates_state, verbose);
-        move_cmd.push(&mut crates_state, &to_move, verbose);
+        move_cmd.apply(&mut crates_state, verbose)
     }
 
     let last_state = crates_state.iter().map(|stack| {
@@ -47,7 +46,7 @@ fn solve(input_file: &str, verbose: bool) -> (String, String) {
     return (String::from_iter(last_state), String::from("TODO"));
 }
 
-fn print_initial_state(state: &Vec<Stack<char>>) {
+fn print_initial_state(state: &Vec<CargoStack>) {
     for (i, stack) in state.iter().enumerate() {
         println!("Stack {stack_num}: {stack:?}", stack_num = i + 1);
     }

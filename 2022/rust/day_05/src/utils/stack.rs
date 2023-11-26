@@ -1,27 +1,16 @@
-#[derive(Debug)]
-pub struct Stack<T> {
-    stack: Vec<T>,
+pub type CargoStack = Vec<char>;
+
+pub trait CargoStackTrait {
+    fn peek(&self) -> Option<&char>;
+    fn insert_bottom(&mut self, char: char);
 }
 
-impl<T> Stack<T> {
-    pub fn new() -> Self {
-        Stack { stack: Vec::new() }
+impl CargoStackTrait for CargoStack {
+    fn peek(&self) -> Option<&char> {
+        self.last()
     }
 
-    pub fn pop(&mut self) -> Option<T> {
-        self.stack.pop()
-    }
-
-    pub fn push(&mut self, item: T) {
-        self.stack.push(item)
-    }
-
-    pub fn peek(&self) -> Option<&T> {
-        self.stack.last()
-    }
-
-    /// adds the items
-    pub fn setup(&mut self, item: T) {
-        self.stack.insert(0, item);
+    fn insert_bottom(&mut self, char: char) {
+        self.insert(0, char)
     }
 }

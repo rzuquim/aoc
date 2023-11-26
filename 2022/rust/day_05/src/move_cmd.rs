@@ -1,4 +1,4 @@
-use crate::utils::stack::Stack;
+use crate::utils::stack::CargoStack;
 
 #[derive(Debug)]
 pub struct MoveCmd {
@@ -8,33 +8,41 @@ pub struct MoveCmd {
 }
 
 impl MoveCmd {
-    pub fn pop(&self, state: &mut Vec<Stack<char>>, verbose: bool) -> Vec<char> {
-        let from_stack = state
-            .get_mut(self.from)
-            .expect(&format!("Could not find stack {}", self.from));
-        let mut popped = Vec::with_capacity(self.amount);
-        for _ in 0..self.amount {
-            let le_crate = from_stack.pop().expect("Stack already empty!");
-            popped.push(le_crate);
-        }
-        if verbose {
-            println!(
-                "{:?} removed from {:?}! index {}",
-                popped, from_stack, self.from
-            );
-        }
-        return popped;
+    pub fn apply(&self, state: &mut Vec<CargoStack>, verbose: bool) {
+        let to_move = pop(self, state, verbose);
+        push(self, state, &to_move, verbose);
     }
+}
 
-    pub fn push(&self, state: &mut Vec<Stack<char>>, to_push: &Vec<char>, verbose: bool) {
-        let to_stack = state
-            .get_mut(self.to)
-            .expect(&format!("Could not find stack {}", self.to));
-        for le_crate in to_push {
-            to_stack.push(*le_crate);
-        }
-        if verbose {
-            println!("{:?} push into {:?}! index: {}", to_push, to_stack, self.to);
-        }
+fn pop(move_cmd: &MoveCmd, state: &mut Vec<CargoStack>, verbose: bool) -> Vec<char> {
+    let from_stack = state
+        .get_mut(move_cmd.from)
+        .expect(&format!("Could not find stack {}", move_cmd.from));
+    let mut popped = Vec::with_capacity(move_cmd.amount);
+    for _ in 0..move_cmd.amount {
+        let le_crate = from_stack.pop().expect("Stack already empty!");
+        popped.push(le_crate);
+    }
+    if verbose {
+        println!(
+            "{:?} removed from {:?}! index {}",
+            popped, from_stack, move_cmd.from
+        );
+    }
+    return popped;
+}
+
+fn push(move_cmd: &MoveCmd, state: &mut Vec<CargoStack>, to_push: &Vec<char>, verbose: bool) {
+    let to_stack = state
+        .get_mut(move_cmd.to)
+        .expect(&format!("Could not find stack {}", move_cmd.to));
+    for le_crate in to_push {
+        to_stack.push(*le_crate);
+    }
+    if verbose {
+        println!(
+            "{:?} push into {:?}! index: {}",
+            to_push, to_stack, move_cmd.to
+        );
     }
 }

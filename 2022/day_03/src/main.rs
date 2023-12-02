@@ -49,10 +49,10 @@ fn parse_rucksack(line: String, verbose: bool) -> Rucksack {
     };
 }
 
-fn common_items_in_compartments<'a>(
-    rucksack: &'a Rucksack,
+fn common_items_in_compartments(
+    rucksack: &Rucksack,
     verbose: bool,
-) -> impl Iterator<Item = &'a char> {
+) -> impl Iterator<Item = &char> {
     let common_items = rucksack.compartment_a.intersection(&rucksack.compartment_b);
     if verbose {
         println!("Common items in compartments {:?}", common_items);

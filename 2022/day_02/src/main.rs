@@ -1,7 +1,7 @@
-mod utils;
+use utils::io;
 
 fn main() {
-    let (input_file, verbose) = utils::parse_args();
+    let (input_file, verbose) = io::parse_args();
     let (part_one, part_two) = solve(&input_file, verbose);
 
     println!("Part one: {}", part_one);
@@ -11,7 +11,7 @@ fn main() {
 fn solve(input_file: &str, verbose: bool) -> (i32, i32) {
     let mut part_one = 0;
     let mut part_two = 0;
-    for line in utils::yield_lines(input_file) {
+    for line in io::yield_lines(input_file) {
         let (round_pt_one, round_pt_two) = parse_game_rounds(line);
         let curr_round_points_pt_one = round_points(&round_pt_one);
         let curr_round_points_pt_two = round_points(&round_pt_two);

@@ -35,3 +35,10 @@ pub fn yield_lines(file_path: &str) -> io::Lines<io::BufReader<File>> {
     let reader = io::BufReader::new(file);
     return reader.lines();
 }
+
+pub fn yield_lines_trimmed(file_path: &str) -> impl Iterator<Item = String> {
+    return yield_lines(file_path).map(|line| {
+        let line = line.expect("Unexpected error reading line!");
+        return line.trim().to_string();
+    });
+}

@@ -1,4 +1,5 @@
-use crate::{utils::stack::CargoStack, CrateCfg};
+use crate::stack::CargoStack;
+use crate::CrateCfg;
 
 #[derive(Debug)]
 pub struct MoveCmd {

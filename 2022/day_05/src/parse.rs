@@ -1,5 +1,5 @@
 use crate::move_cmd::MoveCmd;
-use crate::utils::stack::{CargoStack, CargoStackTrait};
+use crate::stack::{CargoStack, CargoStackTrait};
 
 pub fn initial_state(line: String, state: &mut Vec<CargoStack>, verbose: bool) -> bool {
     if line.is_empty() {

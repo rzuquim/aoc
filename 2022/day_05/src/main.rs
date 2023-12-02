@@ -1,9 +1,9 @@
 mod move_cmd;
 mod parse;
-mod utils;
+mod stack;
 
+use stack::{CargoStack, CargoStackTrait};
 use utils::io;
-use utils::stack::{CargoStack, CargoStackTrait};
 
 fn main() {
     let (input_file, verbose) = io::parse_args();

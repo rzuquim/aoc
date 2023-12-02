@@ -1,7 +1,7 @@
-mod utils;
+use utils::io;
 
 fn main() {
-    let (input_file, verbose) = utils::parse_args();
+    let (input_file, verbose) = io::parse_args();
     let (part_one, part_two) = solve(&input_file, verbose);
 
     println!("Part one: {}", part_one);
@@ -11,7 +11,7 @@ fn main() {
 fn solve(input_file: &str, verbose: bool) -> (u32, u32) {
     let mut contains_count = 0;
     let mut overlap_count = 0;
-    for line in utils::yield_lines_trimmed(input_file) {
+    for line in io::yield_lines_trimmed(input_file) {
         let (range_a, range_b) = parse(line);
         let overlap = check_overlap(&range_a, &range_b);
         if verbose {

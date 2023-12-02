@@ -1,9 +1,9 @@
 use std::collections::HashSet;
 
-mod utils;
+use utils::io;
 
 fn main() {
-    let (input_file, verbose) = utils::parse_args();
+    let (input_file, verbose) = io::parse_args();
     let (part_one, part_two) = solve(&input_file, verbose);
 
     println!("Part one: {}", part_one);
@@ -16,7 +16,7 @@ fn solve(input_file: &str, verbose: bool) -> (u32, u32) {
 
     let mut curr_elve_group = Vec::<Rucksack>::with_capacity(3);
 
-    for line in utils::yield_lines_trimmed(input_file) {
+    for line in io::yield_lines_trimmed(input_file) {
         let rucksack = parse_rucksack(line, verbose);
 
         // part one
@@ -70,7 +70,6 @@ fn find_out_badge(rucksacks: &Vec<Rucksack>, verbose: bool) -> char {
             .intersection(&rucksack.complete_rucksack())
             .cloned()
             .collect::<HashSet<char>>();
-
     }
 
     if common_items.len() > 1 {
@@ -79,7 +78,7 @@ fn find_out_badge(rucksacks: &Vec<Rucksack>, verbose: bool) -> char {
 
     let badge_letter = *common_items.iter().next().unwrap();
     if verbose {
-      println!("Common item in elves rucksack: {badge_letter}!");
+        println!("Common item in elves rucksack: {badge_letter}!");
     }
     return badge_letter;
 }

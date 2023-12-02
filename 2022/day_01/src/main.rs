@@ -1,7 +1,7 @@
-mod utils;
+use utils::io;
 
 fn main() {
-    let (input_file, verbose) = utils::parse_args();
+    let (input_file, verbose) = io::parse_args();
     let (part_one, part_two) = solve(&input_file, verbose);
 
     println!("Part one: {}", part_one);
@@ -13,7 +13,7 @@ fn solve(input_file: &str, verbose: bool) -> (i32, i32) {
     let mut curr_acc = 0;
     let mut elve_index = 0;
 
-    for line in utils::yield_lines(input_file) {
+    for line in io::yield_lines(input_file) {
         if let Some(calories) = parse_calories(line) {
             curr_acc = curr_acc + calories;
         } else {

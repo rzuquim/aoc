@@ -30,9 +30,7 @@ pub fn parse_args() -> (String, bool) {
 }
 
 pub fn yield_lines(file_path: &str) -> io::Lines<io::BufReader<File>> {
-    let path = Path::new(file_path);
-    let file = File::open(path).expect(format!("Could not open file {}", file_path).as_str());
-    let reader = io::BufReader::new(file);
+    let reader = open_read_buffer(file_path);
     return reader.lines();
 }
 
@@ -41,4 +39,10 @@ pub fn yield_lines_trimmed(file_path: &str) -> impl Iterator<Item = String> {
         let line = line.expect("Unexpected error reading line!");
         return line.trim().to_string();
     });
+}
+
+pub fn open_read_buffer(file_path: &str) -> io::BufReader<File> {
+    let path = Path::new(file_path);
+    let file = File::open(path).expect(format!("Could not open file {}", file_path).as_str());
+    return io::BufReader::new(file);
 }

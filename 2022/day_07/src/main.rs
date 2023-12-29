@@ -4,14 +4,61 @@ use utils::io::yield_lines_trimmed;
 
 fn main() {
     let (input_file, verbose) = utils::io::parse_args();
-    let part_one = solve(&input_file, 100000, verbose);
-    // let part_two = solve(&input_file, 14, verbose);
+    let dirs_sizes = calc_dirs_sizes(&input_file, verbose);
+    let part_one = solve_part_one(&dirs_sizes, 100000);
+    let part_two = solve_part_two(&dirs_sizes, 70000000, 30000000, verbose);
 
     println!("Part one: {:?}", part_one);
-    // println!("Part two: {:?}", part_two);
+    println!("Part two: {:?}", part_two);
 }
 
-fn solve(input_file: &str, threshold: usize, verbose: bool) -> usize {
+fn solve_part_one(dirs_sizes: &HashMap<String, usize>, threshold: usize) -> usize {
+    dirs_sizes
+        .iter()
+        .filter_map(
+            |(_, &value)| {
+                if value < threshold {
+                    Some(value)
+                } else {
+                    None
+                }
+            },
+        )
+        .sum()
+}
+
+fn solve_part_two(
+    dirs_sizes: &HashMap<String, usize>,
+    disk_size: usize,
+    update_patch_size: usize,
+    verbose: bool,
+) -> usize {
+    let total_used = dirs_sizes.get("/").expect("Dirs must contain root dir.");
+
+    let unused_space = disk_size - total_used;
+    let required_space = update_patch_size - unused_space;
+
+    if verbose {
+        println!(
+            "total_used: {} / unused: {} / required: {}",
+            total_used, unused_space, required_space
+        );
+    }
+
+    return dirs_sizes
+        .iter()
+        .filter_map(|(_, &value)| {
+            if value >= required_space {
+                Some(value)
+            } else {
+                None
+            }
+        })
+        .min()
+        .expect("Could not find directory bellow the threshold");
+}
+
+fn calc_dirs_sizes(input_file: &str, verbose: bool) -> HashMap<String, usize> {
     let mut pwd = Vec::<String>::new();
     let mut size_map = HashMap::<String, usize>::new();
 
@@ -26,19 +73,7 @@ fn solve(input_file: &str, threshold: usize, verbose: bool) -> usize {
             println!("sizes {:?}", size_map);
         }
     }
-
-    return size_map
-        .iter()
-        .filter_map(
-            |(_, &value)| {
-                if value < threshold {
-                    Some(value)
-                } else {
-                    None
-                }
-            },
-        )
-        .sum::<usize>();
+    return size_map;
 }
 
 fn parse(line: &str) -> Cmd {
@@ -72,6 +107,7 @@ impl Cmd {
             Cmd::Cd { path } => match path.as_str() {
                 "/" => {
                     pwd.clear();
+                    pwd.push(path.clone());
                 }
                 ".." => {
                     pwd.pop();
@@ -105,18 +141,19 @@ pub fn every_sub_dir(pwd: &Vec<String>) -> Vec<String> {
 
 #[cfg(test)]
 mod tests {
-    use crate::solve;
+    use crate::*;
 
     #[test]
     fn test_part_one() {
-        let part_one_solved = solve("./data_input.txt", 100000, false);
-        assert_eq!(part_one_solved, 1844187);
+        let dirs_sizes = calc_dirs_sizes("./data_input.txt", false);
+        let part_one = solve_part_one(&dirs_sizes, 100000);
+        assert_eq!(part_one, 1844187);
     }
 
     #[test]
-    #[ignore]
     fn test_part_two() {
-        let part_two_solved = solve("./data_input.txt", 14, false);
-        assert_eq!(part_two_solved, 1538);
+        let dirs_sizes = calc_dirs_sizes("./data_input.txt", false);
+        let part_two = solve_part_two(&dirs_sizes, 70000000, 30000000, false);
+        assert_eq!(part_two, 4978279);
     }
 }

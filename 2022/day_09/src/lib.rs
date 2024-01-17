@@ -1,3 +1,5 @@
+type Coord = (i32, i32);
+
 pub struct RopeKnot {
     pub x: i32,
     pub y: i32,
@@ -30,14 +32,14 @@ pub fn parse_move_cmd(line: String) -> (char, u32) {
     return (letter, count);
 }
 
-pub fn calc_distance(head: &RopeKnot, tail: &RopeKnot) -> (bool, (i32, i32)) {
-    let dx = head.x - tail.x;
-    let dy = head.y - tail.y;
+pub fn calc_distance(prev_knot: &Coord, knot: &RopeKnot) -> (bool, Coord) {
+    let dx = prev_knot.0 - knot.x;
+    let dy = prev_knot.1 - knot.y;
     // using square to remove signal
     let should_follow = dx * dx > 1 || dy * dy > 1;
     return (should_follow, (dx, dy));
 }
 
-pub fn tail_follows(x: i32, y: i32) -> (i32, i32) {
+pub fn follow(x: i32, y: i32) -> Coord {
     return (x.signum(), y.signum());
 }

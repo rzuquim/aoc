@@ -4,8 +4,55 @@ fn main() {
     let (input_file, verbose) = utils::io::parse_args();
     let part_one = count_safe_reports(&input_file, verbose);
     println!("Part one: {:?}", part_one);
-    // let part_two = solve_part_2(&input_file, verbose);
-    // println!("Part two: {:?}", part_two);
+    let part_two = solve_part_2(&input_file, verbose);
+    println!("Part two {:?}", part_two);
+}
+
+pub fn solve_part_2(input_file: &str, verbose: bool) -> usize {
+    let mut safe_count = 0;
+    let mut i = 0;
+    for line_read in yield_lines(&input_file) {
+        let line = line_read.as_ref().unwrap();
+        if is_safe_report(line, &i, verbose) {
+            safe_count += 1;
+        } else {
+            let data_vec = line.split(' ').collect();
+            if verbose {
+                println!(
+                    "\tLooks like report {i} is not safe, trying alternatives for {data_vec:?}"
+                );
+            }
+
+            if is_safe_removing_one(&data_vec, i, verbose) {
+                safe_count += 1;
+            }
+        }
+        i += 1;
+    }
+
+    return safe_count;
+}
+
+fn is_safe_removing_one(data_vec: &Vec<&str>, report_index: usize, verbose: bool) -> bool {
+    for to_exclude in 0..data_vec.len() {
+        let report_line = data_vec
+            .iter()
+            .enumerate()
+            .filter(|(i, _)| *i != to_exclude)
+            .map(|(_, &s)| s) // get &str from &&str
+            .collect::<Vec<&str>>()
+            .join(" ");
+
+        if verbose {
+            println!("\tTrying {report_line:?}");
+        }
+
+        if is_safe_report(&report_line, &report_index, false) {
+            println!("\tNOW ITS SAFE!!!!");
+            return true;
+        }
+    }
+    return false;
 }
 
 pub fn count_safe_reports(input_file: &str, verbose: bool) -> usize {
@@ -102,5 +149,11 @@ mod tests {
     fn test_part_one() {
         let part_one = count_safe_reports("./data/input.txt", false);
         assert_eq!(part_one, 220);
+    }
+
+    #[test]
+    fn test_part_two() {
+        let part_one = solve_part_2("./data/input.txt", false);
+        assert_eq!(part_one, 296);
     }
 }
